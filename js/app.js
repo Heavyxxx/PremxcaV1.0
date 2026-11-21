@@ -7,7 +7,6 @@ document.addEventListener('DOMContentLoaded', () => {
   initNavbarScroll();
   initQuoteCalculator();
   initQuoteRequest();
-  initModalLeadForm();
   initModalBackdropClose();
 });
 
@@ -116,49 +115,5 @@ function initModalBackdropClose() {
   });
   document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape' && backdrop.classList.contains('active')) closeLeadModal();
-  });
-}
-
-function initModalLeadForm() {
-  const form = document.getElementById('modalCrmForm');
-  if (!form) return;
-
-  form.addEventListener('submit', async (event) => {
-    event.preventDefault();
-    const submitButton = form.querySelector('button[type="submit"]');
-    const feedback = document.getElementById('crmFeedback');
-    const quote = getQuoteDetails();
-    const payload = {
-      ...quote,
-      source: 'instant_quote_calculator',
-      package: 'Expedición privada Oaxaca Infinita',
-      date: quote.trip_edition_or_month,
-      guests: quote.tickets_count,
-      name: document.getElementById('crmName').value.trim(),
-      phone: document.getElementById('crmPhone').value.trim(),
-      email: document.getElementById('crmEmail').value.trim()
-    };
-
-    submitButton.disabled = true;
-    submitButton.textContent = 'Enviando cotización...';
-    if (feedback) feedback.textContent = '';
-
-    try {
-      const result = await sendLeadToCRM(payload);
-      if (!result.ok) {
-        if (feedback) feedback.textContent = 'No pudimos enviar tu solicitud. Intenta de nuevo o contacta al concierge.';
-        return;
-      }
-
-      if (feedback) feedback.textContent = 'Solicitud recibida. El concierge confirmará fecha y disponibilidad contigo.';
-      form.reset();
-      window.setTimeout(closeLeadModal, 2200);
-    } catch (error) {
-      console.error('[CRM Error] No se pudo procesar la solicitud:', error);
-      if (feedback) feedback.textContent = 'Ocurrió un error al enviar tu solicitud. Intenta de nuevo.';
-    } finally {
-      submitButton.disabled = false;
-      submitButton.innerHTML = 'Enviar cotización al concierge';
-    }
   });
 }
